@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUS814 Flashcards &amp; Quiz — Management &amp; Entrepreneurship</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f7f6f2;
+    --rule: #d4cfc4;
+    --accent: #2d4a8a;
+    --accent-light: #e8edf7;
+    --gold: #b5891a;
+    --gold-light: #fdf4e0;
+    --green: #1a6b3a;
+    --green-light: #e6f4ec;
+    --red: #8a2d2d;
+    --red-light: #f7e8e8;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'IBM Plex Serif', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    border-bottom: 4px solid var(--accent);
+  }
+  header .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #a0a8c0;
+    margin-bottom: 0.4rem;
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    font-weight: 600;
+  }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.25rem 1.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* MODE SWITCH */
+  .modeswitch {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1.1rem;
+  }
+  .modeswitch button {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.6rem;
+    border: none;
+    background: #fff;
+    color: #777;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .modeswitch button.active { background: var(--ink); color: #fff; }
+
+  /* CONTROLS */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .toolbar label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #777;
+  }
+  select, button {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    border: 1px solid var(--rule);
+    background: #fff;
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  select:hover, button:hover { border-color: var(--accent); }
+  select { flex: 1; min-width: 130px; }
+  .btn-mono {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* PROGRESS */
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: #777;
+    margin-bottom: 0.6rem;
+  }
+  .progress-row .known { color: var(--green); }
+  .bar {
+    height: 4px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .bar > div {
+    height: 100%;
+    background: var(--accent);
+    width: 0;
+    transition: width 0.3s;
+  }
+
+  /* CARD (study) */
+  .card-wrap { perspective: 1400px; flex: 1; min-height: 320px; }
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    cursor: pointer;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    padding: 1.5rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .face-front { background: #fff; border-left: 4px solid var(--accent); }
+  .face-back  { background: var(--gold-light); border-left: 4px solid var(--gold); transform: rotateY(180deg); }
+  .face .tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .face-front .tag { color: var(--accent); }
+  .face-back .tag  { color: var(--gold); }
+  .face .side {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: #999;
+    margin-bottom: 0.5rem;
+  }
+  .face .content {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin: auto 0;
+  }
+  .face-back .content { font-size: 1.02rem; }
+  .face .hint {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: #aaa;
+    text-align: center;
+    margin-top: 0.9rem;
+  }
+
+  /* NAV BUTTONS */
+  .nav-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  .nav-row button { flex: 1; padding: 0.7rem; }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: #233b6e; }
+  .btn-known { background: var(--green-light); border-color: var(--green); color: var(--green); }
+  .btn-known.active { background: var(--green); color: #fff; }
+
+  /* QUIZ */
+  #quizView { display: none; flex: 1; flex-direction: column; }
+  .quiz-stem {
+    font-family: var(--serif);
+    font-size: 1.18rem;
+    line-height: 1.45;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.3rem 1.3rem;
+    margin-bottom: 1rem;
+  }
+  .quiz-stem .qtag {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.7rem;
+  }
+  .options { display: flex; flex-direction: column; gap: 0.55rem; }
+  .option {
+    text-align: left;
+    width: 100%;
+    padding: 0.8rem 0.9rem;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    border: 1px solid var(--rule);
+    background: #fff;
+    border-radius: 6px;
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+  }
+  .option .key {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--accent);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .option:not(:disabled):hover { border-color: var(--accent); background: var(--accent-light); }
+  .option.correct { background: var(--green-light); border-color: var(--green); }
+  .option.correct .key { background: var(--green); color: #fff; border-color: var(--green); }
+  .option.wrong { background: var(--red-light); border-color: var(--red); }
+  .option.wrong .key { background: var(--red); color: #fff; border-color: var(--red); }
+  .option:disabled { cursor: default; }
+
+  .feedback {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    margin-top: 0.9rem;
+    min-height: 1.1rem;
+  }
+  .feedback.ok { color: var(--green); }
+  .feedback.no { color: var(--red); }
+
+  /* RESULTS */
+  #results { display: none; flex-direction: column; }
+  .score-big {
+    font-family: var(--serif);
+    font-size: 2.6rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 0.5rem 0 0.2rem;
+  }
+  .score-sub { text-align: center; color: #777; font-size: 0.9rem; margin-bottom: 1.2rem; }
+  .review-h {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.5rem;
+  }
+  .review-item {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--red);
+    border-radius: 5px;
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .review-item .rq { font-weight: 600; display: block; margin-bottom: 0.2rem; }
+  .review-item .ra { color: var(--green); }
+
+  footer {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: #999;
+    padding: 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  @media (max-width: 420px) {
+    .face .content, .quiz-stem { font-size: 1.02rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">BUS814 · Postgraduate Business Administration</div>
+  <h1>Management &amp; Entrepreneurship</h1>
+</header>
+
+<main>
+  <div class="modeswitch">
+    <button data-mode="study" class="active">Study</button>
+    <button data-mode="quiz">Quiz</button>
+  </div>
+
+  <!-- ===================== STUDY VIEW ===================== -->
+  <div id="studyView" style="display:flex; flex-direction:column; flex:1;">
+    <div class="toolbar">
+      <label for="moduleSel">Filter</label>
+      <select id="moduleSel" aria-label="Filter by topic"></select>
+      <button id="shuffleBtn" class="btn-mono">↻ Shuffle</button>
+      <button id="resetBtn" class="btn-mono">Reset</button>
+    </div>
+
+    <div class="progress-row">
+      <span id="counter">Card 1 / 50</span>
+      <span class="known" id="knownCount">0 known</span>
+    </div>
+    <div class="bar"><div id="barFill"></div></div>
+
+    <div class="card-wrap">
+      <div class="card" id="card" role="button" tabindex="0" aria-label="Flashcard, click to flip">
+        <div class="face face-front">
+          <div class="tag" id="frontTag"></div>
+          <div class="side">Question</div>
+          <div class="content" id="frontText"></div>
+          <div class="hint">click / space to flip</div>
+        </div>
+        <div class="face face-back">
+          <div class="tag" id="backTag"></div>
+          <div class="side">Answer</div>
+          <div class="content" id="backText"></div>
+          <div class="hint">click / space to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button id="prevBtn">← Prev</button>
+      <button id="knownBtn" class="btn-known">✓ Got it</button>
+      <button id="nextBtn" class="btn-primary">Next →</button>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ VIEW ===================== -->
+  <div id="quizView">
+    <div class="toolbar">
+      <label for="quizModuleSel">Topic</label>
+      <select id="quizModuleSel" aria-label="Quiz topic"></select>
+      <label for="quizLenSel">Length</label>
+      <select id="quizLenSel" style="flex:0 0 auto; min-width:auto;">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="all">All</option>
+      </select>
+      <button id="quizStartBtn" class="btn-mono">Start</button>
+    </div>
+
+    <div id="quizPlay" style="display:flex; flex-direction:column; flex:1;">
+      <div class="progress-row">
+        <span id="quizCounter">Question 1 / 10</span>
+        <span class="known" id="quizScore">Score 0</span>
+      </div>
+      <div class="bar"><div id="quizBar"></div></div>
+
+      <div class="quiz-stem"><span class="qtag" id="quizTag"></span><span id="quizStem"></span></div>
+      <div class="options" id="quizOptions"></div>
+      <div class="feedback" id="quizFeedback"></div>
+
+      <div class="nav-row">
+        <button id="quizNextBtn" class="btn-primary" disabled>Next →</button>
+      </div>
+    </div>
+
+    <div id="results">
+      <div class="score-big" id="resultScore">0 / 10</div>
+      <div class="score-sub" id="resultMsg"></div>
+      <div id="reviewWrap"></div>
+      <div class="nav-row">
+        <button id="retryBtn" class="btn-primary">↻ Restart Quiz</button>
+        <button id="toStudyBtn">Back to Study</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  BUS814 Revision · 50 cards · Study: ← → navigate, Space flips, K marks known · Quiz: keys 1–4 answer, Enter next
+</footer>
+
+<script>
+"use strict";
+
+/* ===================== Flashcard data (50) ===================== */
+const CARDS = [
+  { m: "Management", q: "What are the four functions of management?", a: "Planning, Organising, Leading, and Controlling (the P-O-L-C cycle)." },
+  { m: "Management", q: "Distinguish efficiency from effectiveness.", a: "Efficiency = doing things right (minimum resources / input focus). Effectiveness = doing the right things (goal attainment / output focus)." },
+  { m: "Management", q: "From what words is 'management' derived?", a: "Italian 'maneggiare' (to handle), from Latin 'manus' (hand)." },
+  { m: "Management Thought", q: "What was F. W. Taylor's contribution?", a: "Scientific Management: scientific study of tasks via time-and-motion studies, four principles, and finding the 'one best way' to do each job." },
+  { m: "Management Thought", q: "What did Henri Fayol contribute?", a: "Administrative Management: five functions and fourteen principles, plus the claim that management is a teachable skill (top-down view)." },
+  { m: "Management Thought", q: "What is the core idea of the Human Relations approach (Maslow)?", a: "Productivity depends on social and psychological needs, not pay alone; Maslow's five-level hierarchy runs from physiological to self-actualisation." },
+  { m: "Management Thought", q: "What characterises Weber's Bureaucracy?", a: "Rules, hierarchy, division of labour, and impersonal formal authority — rules govern over individuals to make the organisation rational and predictable." },
+  { m: "Management Thought", q: "What are the indicative span-of-control figures?", a: "Narrow at the top (4–8 senior), wider at the bottom (8–20 lower); Urwick's ceiling: max 4 senior, 8–12 lower." },
+  { m: "Management Thought", q: "Name the four contemporary management approaches.", a: "Quantitative Management, Organisational Behaviour, Systems Theory, and the Contingency Perspective." },
+  { m: "Managers", q: "What are the three levels of managers?", a: "Top managers (set strategy), Middle managers (implement it — the largest group), and First-line managers (supervise operating staff)." },
+  { m: "Managers", q: "Match the three skill types to the level that needs them most.", a: "Technical → first-line; Conceptual → top; Human (interpersonal) → critical at every level." },
+  { m: "Entrepreneurship", q: "Where does 'entrepreneur' come from, and who first applied it to business?", a: "From the French 'entreprendre' (to undertake); first applied to business by Richard Cantillon (18th century), who stressed the risk-bearing role." },
+  { m: "Entrepreneurship", q: "Distinguish entrepreneur, entrepreneurship, and enterprise.", a: "Entrepreneur = the person; entrepreneurship = the process; enterprise = the resulting venture or organisation." },
+  { m: "Entrepreneurship", q: "Give three advantages of entrepreneurship.", a: "Autonomy (independence), Sense of Achievement, and Financial Control over one's own destiny." },
+  { m: "Entrepreneurship", q: "Give three disadvantages of entrepreneurship.", a: "Personal Sacrifices (long hours), Burden of Responsibility ('lonely at the top'), and Little Margin for Error." },
+  { m: "Theories", q: "Name the four major perspectives of entrepreneurship.", a: "Economic, Psychological, Sociological, and Opportunity-Based." },
+  { m: "Theories", q: "Contrast Schumpeter and Kirzner.", a: "Schumpeter: creative destruction — disrupts and creates disequilibrium. Kirzner: alertness — discovers gaps and restores equilibrium." },
+  { m: "Theories", q: "What is McClelland's nAch theory?", a: "The Need for Achievement (1961): people high in nAch seek challenging goals and responsibility, making them more likely to become entrepreneurs." },
+  { m: "Theories", q: "Name the three dimensions of entrepreneurship and a theorist for each.", a: "Individual (McClelland, 1961), Process (Ronstadt, 1984), and Outcome (Gartner, 1988)." },
+  { m: "Culture", q: "What are the five factors of entrepreneurial culture?", a: "Creativity, tolerance for risk, responsiveness to opportunity, leadership, and the ability to exploit rights." },
+  { m: "Culture", q: "What are the three levels of entrepreneurial culture?", a: "Invisible (attributes & values), Semi-visible (mindset), and Visible (behaviour)." },
+  { m: "Business Concept", q: "What are the four elements of a business concept?", a: "The Product/Service, the Target Customer/Market, the Value Proposition, and the Distribution Channel." },
+  { m: "Feasibility", q: "What is feasibility analysis?", a: "Evaluating whether an idea is viable (technically, financially, operationally, legally) before committing resources — it answers 'Should this business be pursued?'" },
+  { m: "Feasibility", q: "How does feasibility analysis differ from a business plan?", a: "Feasibility asks whether the business should exist; the business plan describes how a viable business will operate. Feasibility comes first." },
+  { m: "Feasibility", q: "Name the six feasibility analysis sections.", a: "Market, Technical/Operational, Financial, Organisational/Management, Legal/Regulatory, and Environmental/Social." },
+  { m: "Environment", q: "What do the six letters of PESTEL stand for?", a: "Political, Economic, Social, Technological, Environmental, and Legal." },
+
+  { m: "Management", q: "Define Planning as a management function.", a: "Setting goals and deciding the best course of action to achieve them; it produces objectives, strategies, policies, and budgets." },
+  { m: "Management", q: "Define Controlling as a management function.", a: "Monitoring performance against goals and taking corrective action where deviations occur; it closes the management loop." },
+  { m: "Management", q: "Why is planning called the primary function?", a: "Because organising, leading, and controlling all depend on the goals and plans established during planning." },
+  { m: "Management Thought", q: "What is the focus of Systematic Management?", a: "Procedures and processes for coordination and economical operation of the organisation." },
+  { m: "Management Thought", q: "State Taylor's four principles of Scientific Management.", a: "(1) Develop a science for each task; (2) scientifically select and train workers; (3) cooperate to ensure methods are followed; (4) divide work and responsibility between managers and workers." },
+  { m: "Management Thought", q: "What are Fayol's five management functions?", a: "Plan, Organise, Command, Coordinate, and Control." },
+  { m: "Management Thought", q: "Distinguish Unity of Command from Unity of Direction.", a: "Unity of command: each employee reports to only one superior. Unity of direction: one head and one plan for activities sharing the same objective." },
+  { m: "Management Thought", q: "What are the components of Systems Theory?", a: "An open system of inputs → transformation process → outputs, with feedback loops linking the organisation to its environment." },
+  { m: "Management Thought", q: "State the core claim of the Contingency Perspective.", a: "There is 'no one best way' — the right management approach depends on internal and external circumstances." },
+  { m: "Management Thought", q: "Name the four classical theory principles.", a: "Division of Labour, Scalar & Functional Processes, Structure, and Span of Control." },
+  { m: "Managers", q: "List the six core skills of effective managers.", a: "Planning, Communication, Decision-making, Delegation, Problem-solving, and Motivating." },
+  { m: "Management Thought", q: "When did management emerge as a formal discipline?", a: "During the Industrial Revolution — though it was practised for millennia (China c.1100 BC, Greece, Rome)." },
+  { m: "Theories", q: "Define Schumpeter's 'creative destruction'.", a: "Entrepreneurs drive economic change by introducing innovations that disrupt and displace existing products, firms, and markets." },
+  { m: "Theories", q: "How did J. B. Say describe the entrepreneur?", a: "As one who unites land, labour, and capital to produce a product, shifting resources to higher-yield uses (economic perspective)." },
+  { m: "Theories", q: "What example illustrates the Sociological perspective?", a: "The Igbo trading culture in Nigeria, which socialises entrepreneurship through family apprenticeship and ethnic networks." },
+  { m: "Theories", q: "What example illustrates the Economic perspective?", a: "Aliko Dangote building cement plants that displaced Nigeria's dependence on imported cement." },
+  { m: "Theories", q: "State Ronstadt's (1984) definition (Process dimension).", a: "Entrepreneurship is the dynamic process of creating incremental wealth by individuals who assume major risks in equity, time, and career to provide value for a product or service." },
+  { m: "Theories", q: "State Gartner's (1988) definition (Outcome dimension).", a: "Entrepreneurship is the creation of new organisations, or the renewal of mature ones — particularly new businesses formed for profit and growth." },
+  { m: "Entrepreneurship", q: "What does 'risk tolerance' mean as an entrepreneurial trait?", a: "Accepting calculated risk as inseparable from reward — bearing uncertainty in the pursuit of opportunity." },
+  { m: "Business Concept", q: "Define a value proposition.", a: "The unique benefit a business offers that explains why a customer should choose it over alternatives; it must be compelling, credible, and clearly communicated." },
+  { m: "Business Concept", q: "What does the 'distribution channel' element address?", a: "How the product or service reaches the customer (e.g., direct sales, partnerships, online portals) — ensuring accessibility at the right time." },
+  { m: "Feasibility", q: "What does market feasibility assess?", a: "Whether sufficient demand exists, the size of the market, and the competitive landscape — often via PESTEL plus demand analysis." },
+  { m: "Feasibility", q: "What is financial feasibility concerned with?", a: "Start-up and running costs, the break-even point, and the return on investment — answering whether the venture is financially viable." },
+  { m: "Environment", q: "In the Nigeria PESTEL scenario, what is the key economic tension?", a: "GDP grew 5.19% (a positive signal), but inflation of 36.05% erodes purchasing power and raises input costs." }
+];
+
+/* ===================== Safe storage ===================== */
+const Store = (() => {
+  const KEY = "bus814_known";
+  function read() {
+    try { return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }
+    catch (e) { return new Set(); }
+  }
+  function write(set) {
+    try { localStorage.setItem(KEY, JSON.stringify([...set])); }
+    catch (e) {}
+  }
+  return { read, write };
+})();
+
+/* ===================== Helpers ===================== */
+const el = (id) => document.getElementById(id);
+function shuffleArr(a) {
+  const arr = a.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+const ALL_IDX = CARDS.map((_, i) => i);
+const MODULES = ["All", ...Array.from(new Set(CARDS.map(c => c.m)))];
+
+/* ===================== Mode switching ===================== */
+let mode = "study";
+document.querySelectorAll(".modeswitch button").forEach(b => {
+  b.addEventListener("click", () => setMode(b.dataset.mode));
+});
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll(".modeswitch button").forEach(b =>
+    b.classList.toggle("active", b.dataset.mode === m));
+  el("studyView").style.display = (m === "study") ? "flex" : "none";
+  el("quizView").style.display  = (m === "quiz")  ? "flex" : "none";
+  if (m === "quiz") startQuiz();
+  else renderStudy();
+}
+
+/* ===================== STUDY MODE ===================== */
+let known = Store.read();
+let order = ALL_IDX.slice();
+let pos = 0;
+let activeModule = "All";
+const card = el("card");
+
+(function buildStudyFilter() {
+  const sel = el("moduleSel");
+  MODULES.forEach(m => {
+    const o = document.createElement("option");
+    o.value = m; o.textContent = m;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change", () => { activeModule = sel.value; rebuildStudyOrder(); });
+})();
+
+function rebuildStudyOrder() {
+  order = ALL_IDX.filter(i => activeModule === "All" || CARDS[i].m === activeModule);
+  if (order.length === 0) order = [0];
+  pos = 0;
+  renderStudy();
+}
+function studyIndex() { return order[pos]; }
+function renderStudy() {
+  const c = CARDS[studyIndex()];
+  card.classList.remove("flipped");
+  el("frontTag").textContent = c.m;
+  el("backTag").textContent = c.m;
+  el("frontText").textContent = c.q;
+  el("backText").textContent = c.a;
+  el("counter").textContent = `Card ${pos + 1} / ${order.length}`;
+  el("knownCount").textContent = `${known.size} known`;
+  el("barFill").style.width = `${((pos + 1) / order.length) * 100}%`;
+  const kb = el("knownBtn");
+  if (known.has(studyIndex())) { kb.classList.add("active"); kb.textContent = "✓ Known"; }
+  else { kb.classList.remove("active"); kb.textContent = "✓ Got it"; }
+}
+function flip() { card.classList.toggle("flipped"); }
+function nextStudy() { pos = (pos + 1) % order.length; renderStudy(); }
+function prevStudy() { pos = (pos - 1 + order.length) % order.length; renderStudy(); }
+function toggleKnown() {
+  const i = studyIndex();
+  if (known.has(i)) known.delete(i); else known.add(i);
+  Store.write(known);
+  renderStudy();
+}
+card.addEventListener("click", flip);
+card.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); } });
+el("nextBtn").addEventListener("click", nextStudy);
+el("prevBtn").addEventListener("click", prevStudy);
+el("knownBtn").addEventListener("click", toggleKnown);
+el("shuffleBtn").addEventListener("click", () => { order = shuffleArr(order); pos = 0; renderStudy(); });
+el("resetBtn").addEventListener("click", () => { known.clear(); Store.write(known); renderStudy(); });
+
+/* ===================== QUIZ MODE ===================== */
+let quiz = [];
+let qPos = 0;
+let qScore = 0;
+let qAnswered = false;
+let qMisses = [];
+let quizModule = "All";
+
+(function buildQuizFilter() {
+  const sel = el("quizModuleSel");
+  MODULES.forEach(m => {
+    const o = document.createElement("option");
+    o.value = m; o.textContent = m;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change", () => { quizModule = sel.value; startQuiz(); });
+})();
+el("quizLenSel").addEventListener("change", startQuiz);
+el("quizStartBtn").addEventListener("click", startQuiz);
+el("retryBtn").addEventListener("click", startQuiz);
+el("toStudyBtn").addEventListener("click", () => setMode("study"));
+el("quizNextBtn").addEventListener("click", nextQuiz);
+
+function buildOptions(correctIdx) {
+  const correct = CARDS[correctIdx].a;
+  let same = shuffleArr(ALL_IDX.filter(i => i !== correctIdx && CARDS[i].m === CARDS[correctIdx].m))
+    .map(i => CARDS[i].a);
+  let pool = [...new Set(same)].filter(a => a !== correct);
+  if (pool.length < 3) {
+    const extra = shuffleArr(ALL_IDX.filter(i => i !== correctIdx)).map(i => CARDS[i].a)
+      .filter(a => a !== correct && !pool.includes(a));
+    pool = pool.concat(extra);
+  }
+  return shuffleArr([correct, ...pool.slice(0, 3)]);
+}
+
+function startQuiz() {
+  let filtered = ALL_IDX.filter(i => quizModule === "All" || CARDS[i].m === quizModule);
+  filtered = shuffleArr(filtered);
+  const lenVal = el("quizLenSel").value;
+  const n = (lenVal === "all") ? filtered.length : Math.min(parseInt(lenVal, 10), filtered.length);
+  const chosen = filtered.slice(0, Math.max(1, n));
+  quiz = chosen.map(i => ({ idx: i, tag: CARDS[i].m, stem: CARDS[i].q, correct: CARDS[i].a, options: buildOptions(i) }));
+  qPos = 0; qScore = 0; qAnswered = false; qMisses = [];
+  el("results").style.display = "none";
+  el("quizPlay").style.display = "flex";
+  renderQuiz();
+}
+
+function renderQuiz() {
+  qAnswered = false;
+  const q = quiz[qPos];
+  el("quizCounter").textContent = `Question ${qPos + 1} / ${quiz.length}`;
+  el("quizScore").textContent = `Score ${qScore}`;
+  el("quizBar").style.width = `${(qPos / quiz.length) * 100}%`;
+  el("quizTag").textContent = q.tag;
+  el("quizStem").textContent = q.stem;
+  el("quizFeedback").textContent = "";
+  el("quizFeedback").className = "feedback";
+  el("quizNextBtn").disabled = true;
+  el("quizNextBtn").textContent = (qPos === quiz.length - 1) ? "See Results →" : "Next →";
+
+  const box = el("quizOptions");
+  box.innerHTML = "";
+  const letters = ["A", "B", "C", "D"];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerHTML = `<span class="key">${letters[i]}</span><span>${opt}</span>`;
+    btn.addEventListener("click", () => answer(i, btn));
+    box.appendChild(btn);
+  });
+}
+
+function answer(i, btn) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const q = quiz[qPos];
+  const chosen = q.options[i];
+  const buttons = Array.from(el("quizOptions").children);
+  buttons.forEach((b, j) => {
+    b.disabled = true;
+    if (q.options[j] === q.correct) b.classList.add("correct");
+  });
+  const fb = el("quizFeedback");
+  if (chosen === q.correct) {
+    qScore++;
+    fb.textContent = "✓ Correct";
+    fb.className = "feedback ok";
+  } else {
+    btn.classList.add("wrong");
+    fb.textContent = "✗ Incorrect — the correct answer is highlighted";
+    fb.className = "feedback no";
+    qMisses.push(q);
+  }
+  el("quizScore").textContent = `Score ${qScore}`;
+  el("quizNextBtn").disabled = false;
+}
+
+function nextQuiz() {
+  if (!qAnswered) return;
+  if (qPos < quiz.length - 1) { qPos++; renderQuiz(); }
+  else showResults();
+}
+
+function showResults() {
+  el("quizPlay").style.display = "none";
+  el("results").style.display = "flex";
+  const pct = Math.round((qScore / quiz.length) * 100);
+  el("resultScore").textContent = `${qScore} / ${quiz.length}`;
+  let msg;
+  if (pct >= 90) msg = `${pct}% — excellent command of the material.`;
+  else if (pct >= 70) msg = `${pct}% — solid; review the misses below.`;
+  else if (pct >= 50) msg = `${pct}% — a fair base; focus your revision on the topics below.`;
+  else msg = `${pct}% — worth another study pass before re-testing.`;
+  el("resultMsg").textContent = msg;
+
+  const wrap = el("reviewWrap");
+  wrap.innerHTML = "";
+  if (qMisses.length) {
+    const h = document.createElement("div");
+    h.className = "review-h";
+    h.textContent = `Review (${qMisses.length} missed)`;
+    wrap.appendChild(h);
+    qMisses.forEach(q => {
+      const d = document.createElement("div");
+      d.className = "review-item";
+      d.innerHTML = `<span class="rq">${q.stem}</span><span class="ra">${q.correct}</span>`;
+      wrap.appendChild(d);
+    });
+  }
+}
+
+/* ===================== Keyboard ===================== */
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "SELECT") return;
+  if (mode === "study") {
+    if (e.key === "ArrowRight") nextStudy();
+    else if (e.key === "ArrowLeft") prevStudy();
+    else if (e.key === " ") { e.preventDefault(); flip(); }
+    else if (e.key.toLowerCase() === "k") toggleKnown();
+  } else if (mode === "quiz") {
+    if (el("results").style.display === "flex") return;
+    if (["1", "2", "3", "4"].includes(e.key) && !qAnswered) {
+      const btns = el("quizOptions").children;
+      const idx = parseInt(e.key, 10) - 1;
+      if (btns[idx]) btns[idx].click();
+    } else if (e.key === "Enter" && qAnswered) { nextQuiz(); }
+  }
+});
+
+/* ===================== Init ===================== */
+renderStudy();
+</script>
+</body>
+</html>
